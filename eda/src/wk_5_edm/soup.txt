@@ -1,0 +1,30 @@
+{"purchase":{"categories":[291,386,188,133,140,1038],
+"male":850,"female":1303,"none":23,"total":2176,
+"total_categories":2176,"max_categories":1038,
+"total_info":["2.2","\ucc9c \uac1c \uc774\uc0c1"],
+"quantity":2214,"cache":false,"cached_at":"2024-01-19 15:31:10",
+"categories_rate":[13,18,9,6,6,48],"max_category_keys":[5],
+"graph_text":{"age":"40","sex":"f","sex_text":"\uc5ec\uc131",
+"age_group":"40","age_text":"\uc138 \uc774\uc0c1"},
+"cached_at_txt":"40\ubd84 \uc804 \uac31\uc2e0",
+"output":"<\/i>\n40<\/em>\uc138 \uc774\uc0c1<\/strong>\n,
+<\/strong>\n\uc5ec\uc131<\/span>\n\uc5d0\uac8c \uc778\uae30 
+\ub9ce\uc740 \uc0c1\ud488<\/span>\n<\/i>"},
+"pageview":{"categories":[11977,2224,1376,758,811,6246],
+"male":5246,"female":10222,"none":7924,"total":23392,
+"total_categories":23392,"max_categories":11977,"total_info":[0,""],
+"quantity":0,"cache":false,"cached_at":"2024-01-19 15:31:10",
+"total_txt":[2.2999999999999998,"\ub9cc \ud68c \uc774\uc0c1"],
+"cached_at_txt":"40\ubd84 \uc804 \uac31\uc2e0"},"cache":true}
+
+
+
+
+
+
+
+"graph_text":{"age":"40","sex":"f","sex_text":"\uc5ec\uc131","age_group":"40","age_text":"\uc138 \uc774\uc0c1"}
+
+
+
+
