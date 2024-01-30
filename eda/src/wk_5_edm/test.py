@@ -7,7 +7,10 @@
 # t2 = 26
 # a = 10
 # b = 8
-# t = 0
+
+######################
+
+
 # temperature = -10
 # onboard = [0,0,0,0,0,1,0]
 
@@ -15,13 +18,39 @@
 # t2 = 5
 # a = 5
 # b = 1
-temperature = 11
+
+###################
+
+# temperature = 11
+# onboard = [0,1,1,1,1,1,1,0,0,0,1,1]
+
+# t1 = 8
+# t2 = 10
+# a = 10
+# b = 1
+
+##############
+
+# temperature = 11
+# onboard = [0,1,1,1,1,1,1,0,0,0,1,1]
+
+# t1 = 8
+# t2 = 10
+# a = 10
+# b = 100
+
+
+######################################
+######################################
+######################################
+
+temperature = 40
 onboard = [0,1,1,1,1,1,1,0,0,0,1,1]
 
-t1 = 8
-t2 = 10
-a = 10
-b = 1
+t1 = 8.8
+t2 = 39
+a = 40.5
+b = 50
 
 
 
@@ -29,7 +58,7 @@ b = 1
 
 
 ###### int(abs(lenth / 2) + 0.5) # 정상적인 반올림방식 
-answer = -b
+answer = 0
 
 temper_in = temperature
 if temperature < t1:
@@ -43,18 +72,21 @@ while 1:
     c = 0
     val1 = 0
     val2 = 0
-    if onboard == [] or len(onboard) == 1:
+    if len(onboard) <= 1:
         break
     now = onboard[0]
     board_next = abs(now - 1)
     
     try: # 길이 구하기
         lenth = len(onboard[:onboard.index(board_next)])
+        if lenth == len(onboard):
+            lenth -= 1
         del(onboard[:onboard.index(board_next)])
+
     except:
         lenth = len(onboard)
         del(onboard[:])
-
+    # print(temper_in)
     if b >= a/2: # 절반이하
         val1 = int((lenth - abs(temper_in - target_t)) / 
                     2 + 0.5) * a
@@ -66,26 +98,29 @@ while 1:
         # (다음길이 > abs(외부온도 - 현재온도) or 다음길이 <= 1) and 
         #(길이 - abs(현재온도 - 경계온도)) % 2 != 0 and b < a:
         if (next_lenth > abs(temperature - temper_in) or next_lenth <=1) and (lenth - abs(temper_in - target_t)) % 2 != 0 and b < a:
-            val1 += b - a
+            val1 -= a
+        
         
         # 재난방
-        if temper_in == temperature or (abs(
-            temper_in - temperature) <= int((lenth / 2)+0.5)):
+        if  (temper_in == temperature or (abs(
+            temper_in - temperature) <= int((lenth / 2) + 0.5))) and (
+                now == 0):
             val2 = abs(temperature - target_t) * a
 
         if val1 <= 0:
             val1 = val2 + 1
         elif val2 <= 0:
             val2 = val1 + 1
-        if now == 1:# 값처리
+        
+
+        if val1 < val2:
             answer += val1
         else:
-            if val1 < val2:
-                answer += val1
-            else:
-                answer += val2
+            answer += val2
+                
+        print(val1, val2, answer, onboard, lenth)
+        temper_in = target_t + c
         
-        temper_in = target_t + lenth % 2
         
     else: # 절반초과
         if temper_in >= t1 and temper_in <= t2:
@@ -95,20 +130,18 @@ while 1:
             val2 = abs(temperature - target_t) * a
         if val1 <= 0 and val2 <= 0:
             pass
-        
         elif val1 <= 0:
             val1 = val2+1
         elif val2 <=0:
             val2 = val1+1
         
-        print(val1, val2, answer)
-        if now == 1:# 값처리
+        print(val1, val2, answer, onboard, lenth)
+        
+        if val1 < val2:
             answer += val1
         else:
-            if val1 < val2:
-                answer += val1
-            else:
-                answer += val2
+            answer += val2
+            del(onboard[0])
         temper_in = target_t
 
             
