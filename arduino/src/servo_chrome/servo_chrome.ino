@@ -3,7 +3,11 @@
 Servo servo;
 int deg = 28;
 int count1 = 0;
+Search
+
 int flag = 0;
+Search
+
 float light1 = 0;
 bool status = 0;
 float old_data = 0;
