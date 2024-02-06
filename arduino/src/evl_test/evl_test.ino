@@ -144,10 +144,8 @@ void move_evl() {
       target = 0.0;
     }
   }
-
-
-
 }
+
 
 void move_pop() {
   float max_loc = -1.0;
