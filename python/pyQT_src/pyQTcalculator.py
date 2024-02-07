@@ -12,7 +12,7 @@ class WindowClass(QMainWindow, from_class) :
         self.setupUi(self)
         self.setWindowTitle("PyQTcalculator")
         self.order = ""
-        self.label.setText("0")
+        self.label.setText("")
         self.label_2.setText("0")
 
         self.pushButton_1.clicked.connect(self.all_clear)
@@ -39,18 +39,22 @@ class WindowClass(QMainWindow, from_class) :
 
     def check_double(self, order):
         try:
+            
             if self.order[-1] in ["/", "x", "-", "+"]:
-                self.order = self.order[:-2] + order
-                self.to_text()
+                if self.order[-3] == "%" and order == "%":
+                    pass
+                else:
+                    self.order = self.order[:-2] + order
+                    self.to_text()
             else:
-                if self.order[-1] == "%" and order == " %":
+                if self.order[-1] == "%" and order == "%":
                     pass
                 else:
                     self.order += order
                     self.to_text()
 
         except IndexError:
-            self.label.setText("숫자없이 연산을 진행할 수 없습니다.")
+            self.label_2.setText("숫자없이 연산을 진행할 수 없습니다.")
 
 
     def to_text(self):
@@ -64,34 +68,41 @@ class WindowClass(QMainWindow, from_class) :
         self.to_text()
 
     def back_space(self):
-        self.order = self.order[:-1]
+        try:
+            if self.order[-1] in ["/", "x", "-", "+"]:
+                self.order = self.order[:-2]
+            else:
+                self.order = self.order[:-1]
+        except IndexError:
+            pass
         self.to_text()
 
     def per(self):
-        self.check_double(" %")
+        self.check_double("%")
         
     def div(self):
-        self.order += " /"
-        self.to_text()
+        self.check_double(" /")
 
     def multi(self):
-        self.order += " x"
-        self.to_text()
+        self.check_double(" x")
 
     def minus(self):
-        self.order += " -"
-        self.to_text()
+        self.check_double(" -")
 
     def plus(self):
-        self.order += " +"
-        self.to_text()
+        self.check_double(" +")
 
     def reversal(self):
         self.order += "x(-1)"
         self.to_text()
 
     def dot(self):
-        self.order += "."
+        try:
+            if self.order[-1] in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]:
+                self.order += "."
+        
+        except IndexError:
+            pass
         self.to_text()
 
 
@@ -123,24 +134,30 @@ class WindowClass(QMainWindow, from_class) :
         self.order += "9"
         self.to_text()
     def number_click_0(self):
-        if self.order[-1] == "/":
-            self.label.setText("0으로는 나눌 수 없습니다.")
-        else:
-            self.order += "0"
-            self.to_text()
+        self.order += "0"
+        self.to_text()
+        
 
     
 
 
-    
+# 첫번쨰 숫자가 0일때(예 0154, 089) 계산식 정상적이지 않은 문제(해결)
+# . 이후 = 하면 에러(해결)
+# 연산자 이후 % 누를시 연산자가 %로 바뀌면서 무한 %가되는 에러(해결)
+# 소수에 .이 추가로 붙는 에러(해...결?)
+# / 뒤에 0이 눌리지않아 소숫점 나누기가 불가능한 에러(해결)
+# 연산자 지우면 연산자 앞의 띄어쓰기 안지워지던 에러(해결)
+# 아무것도 없이 backspace 누르면 인덱스에러 발생(해결)
 
     def percent(self):
         order_list = self.order.split("%")
         word = ""
         self.order += " "
         for val in order_list:
-            if val != order_list[-1]:
+            if val != order_list[-1] and len(order_list) > 2:
                 word += val + "*(" + str(eval(val[:val.rfind(" ")])) + "*0.01)"
+            elif val != order_list[-1] and len(order_list) <= 2:
+                word += val + "*(0.01)"
             else:
                 if val != " ":
                     word += val
@@ -150,10 +167,21 @@ class WindowClass(QMainWindow, from_class) :
     def end(self):
         self.order = self.order.replace("x", "*")
         self.percent()#테스트 필요
-        self.order = str(eval(self.order))
-        self.label.setText(self.order)
+        try:
+            if self.order[-1] in ["/", "x", "-", "+"]:
+                self.label_2.setText("수식을 완성시켜주세요")
+            else:
+                self.order = str(eval(self.order))
+                self.label.setText(self.order)
+
+        except IndexError:
+            self.label_2.setText("숫자없이 연산을 진행할 수 없습니다.")
+            
+        except ZeroDivisionError:
+            self.label_2.setText("0으로는 나눌 수 없습니다.")
         
-        
+        except SyntaxError:
+            self.label_2.setText("정상적인 수식이 아닙니다.")
     
 
     

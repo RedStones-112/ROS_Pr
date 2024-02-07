@@ -8,7 +8,7 @@ answer = []
 ################################
 
 
-test = "abc"
+test = "c"
 
 
-print(test[:-2]+"ㅁ")
+print(test[-1])
