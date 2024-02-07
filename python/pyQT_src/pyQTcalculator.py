@@ -12,12 +12,11 @@ class WindowClass(QMainWindow, from_class) :
         self.setupUi(self)
         self.setWindowTitle("PyQTcalculator")
         self.order = ""
-        self.middle_calculation = ""
-        self.label.setText("")
-        self.label2.setText("0")
+        self.label.setText("0")
+        self.label_2.setText("0")
 
-        self.pushButton_1.clicked.connect(self.clear)
-        # self.pushButton_2.clicked.connect()## 괄호 힘들꺼같다
+        self.pushButton_1.clicked.connect(self.all_clear)
+        self.pushButton_2.clicked.connect(self.back_space)
         self.pushButton_3.clicked.connect(self.per)
         self.pushButton_4.clicked.connect(self.div)
         self.pushButton_5.clicked.connect(self.number_click_1)
@@ -38,21 +37,39 @@ class WindowClass(QMainWindow, from_class) :
         self.pushButton_20.clicked.connect(self.end)
         
 
-    def check_double(self):
+    def check_double(self, order):
         try:
-            if self.order[-1] in ["%", "/", "x", "-", "+"]:
-                self.label.setText("완성되지않은 수식입니다.")
-        except IndexError:
-            self.label.setText("완성되지않은 수식입니다.")
+            if self.order[-1] in ["/", "x", "-", "+"]:
+                self.order = self.order[:-2] + order
+                self.to_text()
+            else:
+                if self.order[-1] == "%" and order == " %":
+                    pass
+                else:
+                    self.order += order
+                    self.to_text()
 
-    def clear(self):
+        except IndexError:
+            self.label.setText("숫자없이 연산을 진행할 수 없습니다.")
+
+
+    def to_text(self):
+        self.label.setText(self.order)
+
+    def middle_calculation(self):
+        self.label_2.setText(self.order)
+
+    def all_clear(self):
         self.order = ""
         self.to_text()
 
-    def per(self):
-        self.order += "%"
+    def back_space(self):
+        self.order = self.order[:-1]
         self.to_text()
 
+    def per(self):
+        self.check_double(" %")
+        
     def div(self):
         self.order += " /"
         self.to_text()
@@ -112,37 +129,31 @@ class WindowClass(QMainWindow, from_class) :
             self.order += "0"
             self.to_text()
 
-    def zero_division_error(self):
-        pass
+    
 
+
+    
 
     def percent(self):
         order_list = self.order.split("%")
         word = ""
+        self.order += " "
         for val in order_list:
-            if val != " ":
+            if val != order_list[-1]:
                 word += val + "*(" + str(eval(val[:val.rfind(" ")])) + "*0.01)"
-                #word += "*(" + str(eval(val))# + "*0.01)"
             else:
-                pass
+                if val != " ":
+                    word += val
+                
         self.order = word
 
     def end(self):
-        
-        self.order += " "
         self.order = self.order.replace("x", "*")
-        try:
-            self.percent()#수정 필요
-            self.order = str(eval(self.order))
-            self.label.setText(self.order)
-        except ZeroDivisionError:
-            self.label.setText("0으로는 나눌 수 없습니다.")
-            self.order = ""
-        
-
-    def to_text(self):
-        
+        self.percent()#테스트 필요
+        self.order = str(eval(self.order))
         self.label.setText(self.order)
+        
+        
     
 
     

@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>C</string>
+     <string>AC</string>
     </property>
    </widget>
    <widget class="QLabel" name="label">
@@ -50,7 +50,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>()</string>
+     <string>C</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_3">
