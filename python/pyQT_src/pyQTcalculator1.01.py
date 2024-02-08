@@ -85,7 +85,7 @@ class WindowClass(QMainWindow, from_class) :
 
     def to_text(self, order):
         try:
-            if self.order[-1] == "%" or self.order[-1] == ")":
+            if self.order[-1] == "%" or self.order[-5:] == "x(-1)":
                 self.label_2.setText("먼저 연산자를 붙여주세요.")
             else:
                 self.order += order
@@ -120,7 +120,7 @@ class WindowClass(QMainWindow, from_class) :
         try:
             if self.order[-1] in self.operators:
                 self.order = self.order[:-2]
-            elif self.order[-1] == ")":
+            elif self.order[-5:] == "x(-1)":
                 self.order = self.order[:-5]
             else:
                 self.order = self.order[:-1]
