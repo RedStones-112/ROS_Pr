@@ -18,7 +18,7 @@ from PyQt5 import uic
 import os
 
 
-from_class = uic.loadUiType("/home/rds/amr_ws/ROS_Pr-1/python/pyQT_src/calculator.ui")[0]
+from_class = uic.loadUiType("/home/rds/amr_ws/ROS_Pr-1/python/pyQT_src/calculator_1.02.ui")[0]
 class WindowClass(QMainWindow, from_class) :
     def __init__(self):
         super().__init__() ## 상속받은거 __init__ 동작
@@ -50,6 +50,8 @@ class WindowClass(QMainWindow, from_class) :
         self.pushButton_17.clicked.connect(self.reversal)
         self.pushButton_19.clicked.connect(self.dot)
         self.pushButton_20.clicked.connect(self.end)
+        self.pushButton_21.clicked.connect(self.open_parenthesis)
+        self.pushButton_22.clicked.connect(self.close_parenthesis)
         
 
     def Operator(self):
@@ -61,7 +63,7 @@ class WindowClass(QMainWindow, from_class) :
 
     def check_double(self, order):
         try:
-            if self.order[-1] in self.operators:
+            if self.order[-1] in ["/", "x", "-", "+", "("]:
                 if self.order[-3] == "%" and order == "%":
                     pass
                 else:
@@ -165,8 +167,31 @@ class WindowClass(QMainWindow, from_class) :
 
 
     
+    def open_parenthesis(self):#앞에 연산기호만 허용
+        try:
+            if self.order[-1] in self.operators:
+                self.order += "("
+            else:
+                self.label_2.setText("연산기호 없이 괄호를 열 수 없습니다.")
         
+        except IndexError:
+            self.order += "("
 
+        self.label.setText(self.order)
+
+    def close_parenthesis(self):#앞에 숫자,%만 허용
+        try:
+            if self.order.count("(") > self.order.count(")"):
+                if self.order[-1] in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "%", "."]:
+                    self.order += ")"
+                else:
+                    self.label_2.setText("연산기호 뒤에 괄호를 닫을수 없습니다.")
+            else:
+                self.label_2.setText("열려있는 괄호가 없습니다.")
+        except IndexError:
+            self.order += ")"
+
+        self.label.setText(self.order)
     
 
         
