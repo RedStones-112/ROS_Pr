@@ -37,140 +37,202 @@ class WindowClass(QMainWindow, from_class) :
         self.pushButton_20.clicked.connect(self.end)
         
 
+
     def check_double(self, order):
         try:
-            
             if self.order[-1] in ["/", "x", "-", "+"]:
                 if self.order[-3] == "%" and order == "%":
                     pass
                 else:
                     self.order = self.order[:-2] + order
-                    self.to_text()
+                    self.label.setText(self.order)
+
             else:
                 if self.order[-1] == "%" and order == "%":
                     pass
                 else:
                     self.order += order
-                    self.to_text()
+                    self.label.setText(self.order)
+
+
+            self.middle_calculation()
 
         except IndexError:
             self.label_2.setText("숫자없이 연산을 진행할 수 없습니다.")
 
 
-    def to_text(self):
-        self.label.setText(self.order)
+
+    def to_text(self, order):
+        try:
+            if self.order[-1] == "%":
+                self.label_2.setText("%뒤에 추가적인 숫자를 붙일 수 없습니다.")
+            elif self.order[-1] == ")":
+                self.label_2.setText("먼저 연산자를 붙여주세요.")
+            else:
+                self.order += order
+                self.label.setText(self.order)
+                self.middle_calculation()
+
+        except IndexError: #
+            self.order += order
+            self.label.setText(self.order)
+
+
 
     def middle_calculation(self):
-        self.label_2.setText(self.order)
+        try:
+            result = self.order.replace("x", "*")
+            result = self.percent(result)
+            result = eval(result)
+            self.label_2.setText(str(result))
+        except:
+            pass
+
+
 
     def all_clear(self):
         self.order = ""
-        self.to_text()
+        self.label.setText(self.order)
+
+
 
     def back_space(self):
         try:
             if self.order[-1] in ["/", "x", "-", "+"]:
                 self.order = self.order[:-2]
+            elif self.order[-1] == ")":
+                self.order = self.order[:-5]
             else:
                 self.order = self.order[:-1]
-        except IndexError:
+        except IndexError:# null data + back_space
             pass
-        self.to_text()
+
+
+        self.label.setText(self.order)
+        self.middle_calculation()
+
+
 
     def per(self):
         self.check_double("%")
+
         
     def div(self):
         self.check_double(" /")
 
+
     def multi(self):
         self.check_double(" x")
+
 
     def minus(self):
         self.check_double(" -")
 
+
     def plus(self):
         self.check_double(" +")
 
+
     def reversal(self):
-        self.order += "x(-1)"
-        self.to_text()
+        try:
+            if self.order[-5:] == "x(-1)":
+                self.order = self.order[:-5]
+            elif self.order[-1] in ["/", "x", "-", "+"]:
+                pass
+            else:
+                self.order += "x(-1)"
+        except:
+            pass
+
+
+        self.label.setText(self.order)
+        self.middle_calculation()
+
+
 
     def dot(self):
         try:
-            if self.order[-1] in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]:
-                self.order += "."
+            if self.order.rfind(" ") == -1 and self.order.count(".") == 0:
+                if self.order[-1] in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]:
+                    self.order += "."
+            elif self.order.rfind(" ") != -1 and self.order[self.order.rfind(" "):].count(".") == 0:
+                if self.order[-1] in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]:
+                    self.order += "."
         
-        except IndexError:
+        except IndexError: # null data + dot
             pass
-        self.to_text()
+        self.label.setText(self.order)
 
 
     def number_click_1(self):
-        self.order += "1"
-        self.to_text()
+        self.to_text("1")
     def number_click_2(self):
-        self.order += "2"
-        self.to_text()
+        self.to_text("2")
     def number_click_3(self):
-        self.order += "3"
-        self.to_text()
+        self.to_text("3")
     def number_click_4(self):
-        self.order += "4"
-        self.to_text()
+        self.to_text("4")
     def number_click_5(self):
-        self.order += "5"
-        self.to_text()
+        self.to_text("5")
     def number_click_6(self):
-        self.order += "6"
-        self.to_text()
+        self.to_text("6")
     def number_click_7(self):
-        self.order += "7"
-        self.to_text()
+        self.to_text("7")
     def number_click_8(self):
-        self.order += "8"
-        self.to_text()
+        self.to_text("8")
     def number_click_9(self):
-        self.order += "9"
-        self.to_text()
+        self.to_text("9")
     def number_click_0(self):
-        self.order += "0"
-        self.to_text()
+        self.to_text("0")
         
 
     
 
-
+# %이후 숫자가 눌러지는 에러 (해결)
 # 첫번쨰 숫자가 0일때(예 0154, 089) 계산식 정상적이지 않은 문제(해결)
 # . 이후 = 하면 에러(해결)
 # 연산자 이후 % 누를시 연산자가 %로 바뀌면서 무한 %가되는 에러(해결)
-# 소수에 .이 추가로 붙는 에러(해...결?)
 # / 뒤에 0이 눌리지않아 소숫점 나누기가 불가능한 에러(해결)
 # 연산자 지우면 연산자 앞의 띄어쓰기 안지워지던 에러(해결)
 # 아무것도 없이 backspace 누르면 인덱스에러 발생(해결)
+# 여러개의 %연산이 들어갈 시 에러발생(해결)
+# %연산 오류(해결)
+# 부호 반전 반복시 무한으로 수식이 늘어나던 문제(해결)
+# .뒤에 반전붙이고 %가 붙는 문제(해결)
+# 소수에 .이 추가로 붙는 에러(해결)
+# 정수와 소수의 계산시 쓰래기값 붙음(해결못함)
+        
+    def percent(self, order):
+        if order.count("%") >= 1:
+            order += " "
+            order_list = order.split("%")
+            result = ""
 
-    def percent(self):
-        order_list = self.order.split("%")
-        word = ""
-        self.order += " "
-        for val in order_list:
-            if val != order_list[-1] and len(order_list) > 2:
-                word += val + "*(" + str(eval(val[:val.rfind(" ")])) + "*0.01)"
-            elif val != order_list[-1] and len(order_list) <= 2:
-                word += val + "*(0.01)"
-            else:
-                if val != " ":
-                    word += val
-                
-        self.order = word
+            for val in order_list:
+                try:
+                    if val.count(" ") == 0:
+                        result = val + "*0.01"
+                    elif val != order_list[-1]:
+                        result = "(" + result + val[:val.rfind(" ")] + ")" + f"""*(1{val[val.rfind(" ")+1]}({val[val.rfind(" ")+2:]}*0.01))"""
+                        
+                    elif val == order_list[-1]:
+                        result += val
+                    
+                except:
+                    pass
+        else:
+            result = order
+
+
+        return result
 
     def end(self):
         self.order = self.order.replace("x", "*")
-        self.percent()#테스트 필요
         try:
             if self.order[-1] in ["/", "x", "-", "+"]:
                 self.label_2.setText("수식을 완성시켜주세요")
             else:
+                self.order = self.percent(self.order)
                 self.order = str(eval(self.order))
                 self.label.setText(self.order)
 
