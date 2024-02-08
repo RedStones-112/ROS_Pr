@@ -76,7 +76,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>/</string>
+     <string> /</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_5">
@@ -128,7 +128,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>x</string>
+     <string> x</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_9">
@@ -180,7 +180,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>-</string>
+     <string> -</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_13">
@@ -232,7 +232,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>+</string>
+     <string> +</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_17">
