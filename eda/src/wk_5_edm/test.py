@@ -6,12 +6,12 @@ on_board = [0,0,1,1,1,1,1]
 
 t1 = 18
 t2 = 26
-a = 10
-b = 8
+a = 10 # 온도상승 비용
+b = 8 # 온도유지 비용
 t = 0
 ###### int(abs(lenth / 2) + 0.5) # 정상적인 반올림방식 
 answer = 0
-on_board = on_board[1:]
+
 
 
 if temper_out < t1:
@@ -37,10 +37,17 @@ while 1:
             del(on_board[:])
 
         val1 = lenth * b
-        val2 = int(abs((lenth - abs(temper_in - target_t)
-                            ) / 2) + 0.5) * b
+        val2 = int(abs((lenth - abs(temper_in - target_t)) / 2) + 0.5) * a
+        if int(abs((lenth - abs(temper_in - target_t)))) % 2 != 0 :
+            c = 1
+        else:
+            c = 0
+            
+        if val2 < val1: # 유지비용과 재난방 비용 비교
+            answer += val2
 
-        
+        else:
+            answer += val1
 
         temper_in = target_t + c
 
@@ -54,8 +61,7 @@ while 1:
 
         # 재난방 비용 계산 1
         if abs(temper_in - temper_out) <= lenth / 2 and temper_in <= t2 and temper_in >= t1:
-            val1 = int(abs((lenth - abs(temper_in - target_t)
-                            ) / 2) + 0.5) * a##########
+            val1 = int(abs((lenth - abs(temper_in - target_t)) / 2) + 0.5) * a##########
             
         # 계산 2
         else:
@@ -64,8 +70,7 @@ while 1:
 
         # 유지 비용
         if temper_in <= t2 and temper_in >= t1:
-            val2 = int(abs((lenth - abs(temper_in - target_t)
-                            ) / 2) + 0.5) * b 
+            val2 = int(abs((lenth - abs(temper_in - target_t)) / 2) + 0.5) * b 
         else:
             val2 = ((abs(temper_in - target_t) * a) + 
                     (int(((lenth - abs(temper_in - target_t)) / 2) + 0.5) * b ))
