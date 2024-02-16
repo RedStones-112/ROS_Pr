@@ -3,51 +3,39 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6 import uic
 
+# import mysql.connector
+# import pandas as pd
+# mydb = mysql.connector.connect(
+#     host = "localhost",
+#     user = "root",
+#     password = "8470",
+#     database = "amrbase",
+# )
+# cur = mydb.cursor()
 
-from_class = uic.loadUiType("/home/rds/amr_ws/ROS_Pr-1/python/pyQT_src/qt06.ui")[0]
+
+from_class = uic.loadUiType("/home/rds/amr_ws/ROS_Pr-1/python/pyQT_src/qt07.ui")[0]
 class WindowClass(QMainWindow, from_class) :
     def __init__(self):
         super().__init__() ## 상속받은거 __init__ 동작
         self.setupUi(self)
         self.setWindowTitle("06pt")
-        
-        for year in range(1990, 2025 + 1):
-            self.cbYear.addItem(str(year))
 
-        for month in range(1, 12 + 1):
-            self.cbMonth.addItem(str(month))
-
-        for day in range(1, 31 + 1):
-            self.cbDay.addItem(str(day))
-        
-        self.cbYear.setCurrentText(str(1990))
-        self.cbDay.currentIndexChanged.connect(self.printBirthday)
-
-        self.calendarWidget.clicked.connect(self.selectDate)
+        #self.tableWidget.horizontalHeader().setSectionResizeMode()
+    
+        self.pushButton.clicked.connect(self.create_Q)
 
 
-    def printBirthday(self):
-        year = self.cbYear.currentText()
-        month = self.cbMonth.currentText()
-        day = self.cbDay.currentText()
-        self.lineEdit.setText(year + month.zfill(2) + day.zfill(2))
+    def create_Q(self):
+        pass
 
+    def Add(self, name, gender, brithday):
+        row = self.tableWidget.rowCount()
 
-    def selectDate(self):
-        date = self.calendarWidget.selectedDate()
-        year = date.toString("yyyy")
-        month = date.toString("M")
-        day = date.toString("d")
-
-        self.cbYear.setCurrentText(year)
-        self.cbYear.setCurrentText(month)
-        self.cbYear.setCurrentText(day)
-
-        self.cbYear.setCurrentText(year)
-        self.cbMonth.setCurrentText(month)
-        self.cbDay.setCurrentText(day)
-
-        self.lineEdit.setText(year + month.zfill(2) + day.zfill(2))
+        self.tableWidget.insertRow(row)
+        self.tableWidget.setItem(row, 0, name)
+        self.tableWidget.setItem(row, 1, gender)
+        self.tableWidget.setItem(row, 2, brithday)
 
 
 if __name__ == "__main__":
