@@ -11,7 +11,7 @@
 # .뒤에 반전붙이고 %가 붙는 문제(해결)
 # 소수에 .이 추가로 붙는 에러(해결)
 # 정수와 소수의 계산시 쓰래기값 붙음(해결못함)
-# 연속으로 괄호를 열 수 없던 문제
+# 연속으로 괄호를 열거나 닫을 수 없던 문제(해결)
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -19,7 +19,7 @@ from PyQt5 import uic
 import os
 
 #/home/rds/amr_ws/ROS_Pr-1/python/pyQT_src/calculator_1.02.ui
-from_class = uic.loadUiType("C:/Users/gg/Desktop/project/ROS_Pr/python/pyQT_src/calculator_1.02.ui")[0]
+from_class = uic.loadUiType("/home/rds/amr_ws/ROS_Pr-1/python/pyQT_src/calculator_1.02.ui")[0]
 class WindowClass(QMainWindow, from_class) :
     def __init__(self):
         super().__init__() ## 상속받은거 __init__ 동작
@@ -65,16 +65,18 @@ class WindowClass(QMainWindow, from_class) :
     def check_double(self, order):
         try:
             if self.order[-1] in self.operators:
-                if self.order[-3] == "%" and order == "%":
-                    pass
+                
+                if order == "%":
+                    self.label_2.setText("숫자를 먼저 입력해 주십시오")
                 else:
                     self.order = self.order[:-2] + order
                     self.label.setText(self.order)
 
             else:
                 if self.order[-1] == "%" and order == "%":
-                    pass
-                elif self.order[-1] == "(" and order in self.operators:
+                    self.order = self.order[:-1]
+                    self.label.setText(self.order)
+                elif self.order[-1] == "(":
                     self.label_2.setText("숫자를 먼저 입력해 주십시오")
                 else:
                     self.order += order
@@ -143,7 +145,7 @@ class WindowClass(QMainWindow, from_class) :
         try:
             if self.order[-5:] == "x(-1)":
                 self.order = self.order[:-5]
-            elif self.order[-1] in self.operators:
+            elif self.order[-1] in ["/", "x", "-", "+", "("]:
                 pass
             else:
                 self.order += "x(-1)"
@@ -183,18 +185,20 @@ class WindowClass(QMainWindow, from_class) :
 
         self.label.setText(self.order)
 
-    def close_parenthesis(self):#앞에 숫자,%만 허용
+    def close_parenthesis(self):#앞에 숫자, %, ) 만 허용
         try:
             if self.order.count("(") > self.order.count(")"):
-                if self.order[-1] in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "%", "."]:
+                if self.order[-1] in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "%", ".", ")"]:
                     self.order += ")"
                 else:
-                    self.label_2.setText("연산기호 뒤에 괄호를 닫을수 없습니다.")
+                    self.label_2.setText("기호 뒤에 괄호를 닫거나 공백괄호를 만들 수 없습니다.")
             else:
                 self.label_2.setText("열려있는 괄호가 없습니다.")
         except IndexError:
-            self.order += ")"
+            pass
 
+
+        self.middle_calculation()
         self.label.setText(self.order)
     
 
