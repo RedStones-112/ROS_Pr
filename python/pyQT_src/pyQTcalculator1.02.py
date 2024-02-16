@@ -118,6 +118,7 @@ class WindowClass(QMainWindow, from_class) :
     def all_clear(self):
         self.order = ""
         self.label.setText(self.order)
+        self.label_2.setText("")
 
 
 
@@ -238,8 +239,11 @@ class WindowClass(QMainWindow, from_class) :
         except ZeroDivisionError:
             self.label_2.setText("0으로는 나눌 수 없습니다.")
         
-        except SyntaxError:
-            self.label_2.setText("정상적인 수식이 아닙니다.")
+        except SyntaxError as E:
+            if str(E)[:20] == "'(' was never closed":
+                self.label_2.setText("괄호가 닫히지 않은 수식입니다.")
+            else:
+                self.label_2.setText("정상적인 수식이 아닙니다.")
     
 
     
