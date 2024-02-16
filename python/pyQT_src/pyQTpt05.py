@@ -5,19 +5,18 @@ from PyQt5 import uic
 import os
 
 
-from_class = uic.loadUiType("/home/rds/amr_ws/ROS_Pr-1/python/pyQT_src/count.ui")[0]
+from_class = uic.loadUiType("/home/rds/amr_ws/ROS_Pr-1/python/pyQT_src/qt05.ui")[0]
 class WindowClass(QMainWindow, from_class) :
     def __init__(self):
         super().__init__() ## 상속받은거 __init__ 동작
         self.setupUi(self)
         self.setWindowTitle("05pt")
         
-        self.pushButton.clicked.connect(self.buttonClicked_1)
+        self.pushButton_1.clicked.connect(self.buttonClicked_1)
         
         
+        self.lineEdit.returnPressed.connect(self.enter)
         
-        self.textEdit.textChanged.connect(self.change)
-
 
 
     def buttonClicked_1(self) :
@@ -26,10 +25,19 @@ class WindowClass(QMainWindow, from_class) :
 
 
     def change(self):
-        self.lineEdit_3.setText(self.lineEdit_2.text())
+        
+        pass
+        
 
         
-    
+    def enter(self):
+        self.textEdit.setText(self.lineEdit.text())
+        self.lineEdit.setText("")
+        try:
+            pass
+        except:
+            pass
+        
 
     
     
