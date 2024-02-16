@@ -30,7 +30,6 @@ class WindowClass(QMainWindow, from_class) :
         
 
         self.pushButton.clicked.connect(self.create_query)
-        self.ret = 0
 
 
     def create_query(self):
@@ -88,26 +87,17 @@ class WindowClass(QMainWindow, from_class) :
 
 
     def Add(self, df):
-        if self.ret == 1:
-            self.ret = 0
-            self.tableWidget.clearContents()
-        else:
-            self.ret = 1
+        self.tableWidget.clear()
+        try:
             for i in range(0, len(df)):
                 self.tableWidget.insertRow(i)
                 for j in range(0, len(df.columns)):
                     self.tableWidget.setItem(i, j, QTableWidgetItem(str(df[j][i])))
         
-        # try:
-        #     for i in range(0, len(df)):
-        #         self.tableWidget.insertRow(i)
-        #         for j in range(0, len(df.columns)):
-        #             self.tableWidget.setItem(i, j, QTableWidgetItem(str(df[j][i])))
-        
-        # except KeyError:
-        #     pass
-        # except ValueError:
-        #     pass
+        except KeyError:
+            pass
+        except ValueError:
+            pass
         
 
 
