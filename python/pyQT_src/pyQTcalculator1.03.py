@@ -26,7 +26,7 @@ class WindowClass(QMainWindow, from_class) :
         self.setupUi(self)
         self.setWindowTitle("PyQTcalculator")
         self.order = ""
-        self.operators = ["/", "x", "-", "+"]
+        self.operators = ["/", "*", "-", "+"]
         self.numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
         self.label.setText("")
         self.label_2.setText("")
@@ -92,7 +92,7 @@ class WindowClass(QMainWindow, from_class) :
 
     def to_text(self, order):
         try:
-            if self.order[-1] == "%" or self.order[-5:] == "x(-1)" or self.order[-1] == ")":
+            if self.order[-1] == "%" or self.order[-5:] == "*(-1)" or self.order[-1] == ")":
                 self.label_2.setText("먼저 연산자를 붙여주세요.")
             else:
                 self.order += order
@@ -108,7 +108,7 @@ class WindowClass(QMainWindow, from_class) :
 
     def middle_calculation(self):
         try:
-            result = self.order.replace("x", "*")
+            
             result = self.percent(result)
             result = eval(result)
             self.label_2.setText(str(result))
@@ -128,7 +128,7 @@ class WindowClass(QMainWindow, from_class) :
         try:
             if self.order[-1] in self.operators:
                 self.order = self.order[:-2]
-            elif self.order[-5:] == "x(-1)":
+            elif self.order[-5:] == "*(-1)":
                 self.order = self.order[:-5]
             else:
                 self.order = self.order[:-1]
@@ -143,12 +143,12 @@ class WindowClass(QMainWindow, from_class) :
 
     def reversal(self):
         try:
-            if self.order[-5:] == "x(-1)":
+            if self.order[-5:] == "*(-1)":
                 self.order = self.order[:-5]
-            elif self.order[-1] in ["/", "x", "-", "+", "("]:
+            elif self.order[-1] in ["/", "*", "-", "+", "("]:
                 pass
             else:
-                self.order += "x(-1)"
+                self.order += "*(-1)"
         except:
             pass
 
@@ -228,7 +228,7 @@ class WindowClass(QMainWindow, from_class) :
         return result
 
     def end(self):
-        self.order = self.order.replace("x", "*")
+        
         try:
             if self.order[-1] in self.operators:
                 self.label_2.setText("수식을 완성시켜주세요")
