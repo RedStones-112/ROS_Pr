@@ -59,6 +59,9 @@ class WindowClass(QMainWindow, from_class) :
         self.record = Camera(self)
         self.record.daemon = True
 
+        self.playVideo = Camera(self)
+        self.playVideo.deamon = True
+
         self.isCameraOn = 0
         self.count = 0
         self.isRECOn = 0
@@ -66,12 +69,11 @@ class WindowClass(QMainWindow, from_class) :
 
 
         self.pushButton.clicked.connect(self.openFile)
+        self.videoButton.clicked.connect(self.openVideo)
         self.camera_btn.clicked.connect(self.clickCmera)
         self.RECButton.clicked.connect(self.clickREC)
         self.camera.update.connect(self.updateCamera)
 
-    def updateRecording(self):
-        self.writer.write(self.img)
 
     def updateCamera(self):
         ret, img = self.video.read()
@@ -116,6 +118,10 @@ class WindowClass(QMainWindow, from_class) :
         self.camera.running = False
         self.count = 0
         self.video.release()
+
+
+    def updateRecording(self):
+        self.writer.write(self.img)
 
 
     def clickREC(self):
@@ -170,6 +176,48 @@ class WindowClass(QMainWindow, from_class) :
         self.label.setPixmap(self.pixmap)
         self.label.resize(self.pixmap.width(), self.pixmap.height())
 
+
+    def playStart(self, file):
+        self.camera.running = True
+        self.camera.start()
+        self.video = cv2.VideoCapture(file[0])
+        
+    def playStop(self):
+        self.camera.running = False
+        self.count = 0
+        self.video.release()
+
+    def openVideo(self):
+        file = QFileDialog.getOpenFileName(filter="Video (*avi *webm)")
+        print(file)
+        self.playStart(file)
+        
+
+        if self.video.isOpened():
+            f_width = self.video.get(cv2.CAP_PROP_FRAME_WIDTH)
+            f_height = self.video.get(cv2.CAP_PROP_FRAME_HEIGHT)
+            f_channel = self.video.get(cv2.CAP_PROP_CHANNEL)
+
+
+        while self.video.isOpened():
+            ret, frame = self.video.read()
+
+            if ret:
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                qimage = QImage(frame.data, f_width, f_height, f_width*f_channel, QImage.Format_RGB888)
+
+                self.pixmap = self.pixmap.fromImage(qimage)
+                self.pixmap = self.pixmap.scaled(self.label.width(), self.label.height())
+
+                self.label.setPixmap(self.pixmap)
+                self.label.resize(self.pixmap.width(), self.pixmap.height())
+                key = cv2.waitKey(10)
+                if key == 27:
+                    break
+            else:
+                break
+                
+        self.playStop()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

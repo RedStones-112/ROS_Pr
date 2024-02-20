@@ -16,7 +16,7 @@
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
     <rect>
-     <x>510</x>
+     <x>100</x>
      <y>20</y>
      <width>89</width>
      <height>25</height>
@@ -42,7 +42,7 @@
   <widget class="QPushButton" name="camera_btn">
    <property name="geometry">
     <rect>
-     <x>420</x>
+     <x>520</x>
      <y>20</y>
      <width>89</width>
      <height>25</height>
@@ -55,7 +55,7 @@
   <widget class="QPushButton" name="RECButton">
    <property name="geometry">
     <rect>
-     <x>330</x>
+     <x>430</x>
      <y>20</y>
      <width>89</width>
      <height>25</height>
@@ -63,6 +63,19 @@
    </property>
    <property name="text">
     <string>REC Start</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="videoButton">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>20</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>open Video</string>
    </property>
   </widget>
  </widget>
