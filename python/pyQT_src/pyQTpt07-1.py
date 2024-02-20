@@ -1,8 +1,7 @@
 import sys
-from PyQt6.QtWidgets import *
-from PyQt6.QtGui import *
-from PyQt6 import uic
-
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5 import uic
 import mysql.connector
 import pandas as pd
 
@@ -19,6 +18,7 @@ class WindowClass(QMainWindow, from_class) :
         agency_list = ["All", "EDAM엔터테이먼트", "울림엔터테이먼트", "나무엑터스", "YG엔터테이먼트", "안테나"]
         job_list = ["All", "가수", "텔런트", "영화배우", "MC", "개그맨", "모델"]
         gender_list = ["All", "남자", "여자", "그외"]
+
         #self.tableWidget.horizontalHeader().setSectionResizeMode()
         
         for job in job_list:
@@ -28,7 +28,7 @@ class WindowClass(QMainWindow, from_class) :
         for gender in gender_list:
             self.gender_cb.addItem(gender)
         
-
+        self.start_BD.setDateTime(19600101)
         self.pushButton.clicked.connect(self.create_query)
 
 
