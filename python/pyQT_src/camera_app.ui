@@ -143,11 +143,11 @@
     <enum>Qt::Vertical</enum>
    </property>
   </widget>
-  <widget class="QCheckBox" name="checkBox">
+  <widget class="QCheckBox" name="binary_box">
    <property name="geometry">
     <rect>
      <x>670</x>
-     <y>340</y>
+     <y>350</y>
      <width>92</width>
      <height>23</height>
     </rect>
@@ -156,7 +156,7 @@
     <string>Binary</string>
    </property>
   </widget>
-  <widget class="QCheckBox" name="checkBox_2">
+  <widget class="QCheckBox" name="blur_box">
    <property name="geometry">
     <rect>
      <x>670</x>
@@ -166,10 +166,10 @@
     </rect>
    </property>
    <property name="text">
-    <string>CheckBox</string>
+    <string>blur</string>
    </property>
   </widget>
-  <widget class="QCheckBox" name="checkBox_4">
+  <widget class="QCheckBox" name="cannyEdge_box">
    <property name="geometry">
     <rect>
      <x>780</x>
@@ -180,16 +180,6 @@
    </property>
    <property name="text">
     <string>canny edge</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="lineEdit">
-   <property name="geometry">
-    <rect>
-     <x>750</x>
-     <y>340</y>
-     <width>113</width>
-     <height>25</height>
-    </rect>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
@@ -360,6 +350,32 @@
    </property>
    <property name="text">
     <string>capture</string>
+   </property>
+  </widget>
+  <widget class="QSlider" name="threshold_slider">
+   <property name="geometry">
+    <rect>
+     <x>660</x>
+     <y>380</y>
+     <width>231</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QLabel" name="threshold_val">
+   <property name="geometry">
+    <rect>
+     <x>790</x>
+     <y>360</y>
+     <width>101</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>threshold : 0</string>
    </property>
   </widget>
  </widget>

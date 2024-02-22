@@ -55,6 +55,7 @@ class WindowClass(QMainWindow, from_class) :
         self.setupUi(self)
         self.setWindowTitle("camera_app")
         self.RECButton.hide()
+        self.capture_btn.hide()
 
         self.pixmap = QPixmap()
         self.label.setPixmap(self.pixmap)
@@ -70,7 +71,9 @@ class WindowClass(QMainWindow, from_class) :
 
         self.isCameraOn = 0
         self.count = 0
+        self.threshold_RGB = 0
         self.isRECOn = False
+        
         self.canDraw = False
         
         min_max = [0, 100]
@@ -81,12 +84,19 @@ class WindowClass(QMainWindow, from_class) :
         self.x = None
         self.y = None
 
+
+
+
+
         self.R_slider.setRange(min_max[0], min_max[1])
         self.R_slider.setValue(self.RGB[0])
         self.G_slider.setRange(min_max[0], min_max[1])
         self.G_slider.setValue(self.RGB[1])
         self.B_slider.setRange(min_max[0], min_max[1])
         self.B_slider.setValue(self.RGB[2])
+
+        self.threshold_slider.setRange(min_max[0], 255)
+        self.threshold_slider.setValue(self.threshold_RGB)
 
         self.S_slider.setRange(min_max[0], min_max[1])
         self.S_slider.setValue(self.HSV[1])
@@ -95,12 +105,20 @@ class WindowClass(QMainWindow, from_class) :
 
 
 
+
+
+
         self.R_slider.valueChanged.connect(self.silder)
         self.G_slider.valueChanged.connect(self.silder)
         self.B_slider.valueChanged.connect(self.silder)
 
+        self.threshold_slider.valueChanged.connect(self.silder)
+
         self.S_slider.valueChanged.connect(self.silder)
         self.V_slider.valueChanged.connect(self.silder)
+
+
+
 
 
         self.capture_btn.clicked.connect(self.clickCapture)
@@ -116,14 +134,56 @@ class WindowClass(QMainWindow, from_class) :
 
 
 
+    def pretreatment(self, img): # 전처리
+        if self.blur_box.isChecked():###blur
+            img = cv2.GaussianBlur(src=img, ksize=(5, 5), sigmaX=10)
+
+        if self.cannyEdge_box.isChecked():
+            img = cv2.Canny(img, 50, 200)
+
+        img = self.contorl_color(img)
+
+        return img
+
+    def convertPixMapToArr(self):
+        
+        img = (self.pixmap.toImage()).convertToFormat(QImage.Format.Format_RGBA8888)
+        w = img.width()
+        h = img.height()
+
+        img = img.bits()
+        img.setsize(h * w * 4)
+        img = np.array(img).reshape((h, w, 4))
 
 
+
+        return img
+
+    def binary(self, img):
+        
+        img = cv2.inRange(img, (self.threshold_RGB, self.threshold_RGB, self.threshold_RGB), (255, 255, 255))
+        
+        return img
 
     def clickCapture(self, img):
         if self.camera.running == True:
             self.clickCamera()
 
+        img = self.convertPixMapToArr()
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = self.pretreatment(img)
+
+
+        h, w, c = img.shape
+        qimage = QImage(img.data, w, h, w*c, QImage.Format_RGB888)
         
+        self.pixmap = self.pixmap.fromImage(qimage)
+        self.pixmap = self.pixmap.scaled(self.label.width(), self.label.height())
+
+        self.label.setPixmap(self.pixmap)
+
+
+
         self.draw_start()
 
         #cv2. imwrite("/home/rds/amr_ws/ROS_Pr-1/python/cv_data/cap_img.png",img)
@@ -149,8 +209,8 @@ class WindowClass(QMainWindow, from_class) :
                 self.y = event.y()
                 return
             
-            x = self.label.geometry().x()
-            y = self.label.geometry().y()
+            x = self.label.x()
+            y = self.label.y()
 
             self.painter.drawLine(self.x - x, self.y - y, event.x() - x, event.y() - y)
             self.painter.end()
@@ -158,6 +218,7 @@ class WindowClass(QMainWindow, from_class) :
 
             self.x = event.x()
             self.y = event.y()
+            self.painter.end
         
         
 
@@ -170,8 +231,13 @@ class WindowClass(QMainWindow, from_class) :
         self.RGB[1] = self.G_slider.value()
         self.RGB[2] = self.B_slider.value()
 
+        self.threshold_RGB = self.threshold_slider.value()
+
         self.HSV[1] = self.S_slider.value()
         self.HSV[2] = self.V_slider.value()
+
+
+        self.threshold_val.setText(f"threshold : {self.threshold_RGB}")
 
 
     def contorl_color(self, img):
@@ -201,20 +267,33 @@ class WindowClass(QMainWindow, from_class) :
         if ret:
             org = img
             
-
-            img = self.contorl_color(img)
-            self.display = img
-
-            h, w, c = img.shape
-            qimage = QImage(img.data, w, h, w*c, QImage.Format_RGB888)
             
-            self.pixmap = self.pixmap.fromImage(qimage)
-            self.pixmap = self.pixmap.scaled(self.label.width(), self.label.height())
+            img = self.pretreatment(img)
 
-            self.label.setPixmap(self.pixmap)
-            if self.isRECOn == True:
-                self.writer.write(org)
-        
+            if self.binary_box.isChecked():#gray
+                img = self.binary(img)
+                h, w = img.shape
+                qimage = QImage(img.data, w, h, QImage.Format_Grayscale8)
+                
+                self.pixmap = self.pixmap.fromImage(qimage)
+                self.pixmap = self.pixmap.scaled(self.label.width(), self.label.height())
+
+                self.label.setPixmap(self.pixmap)
+                if self.isRECOn == True:
+                    self.writer.write(org)#### 그레이스케일 녹화 수정 필요
+
+            else:#color
+                
+                h, w, c = img.shape
+                qimage = QImage(img.data, w, h, w*c, QImage.Format_RGB888)
+                
+                self.pixmap = self.pixmap.fromImage(qimage)
+                self.pixmap = self.pixmap.scaled(self.label.width(), self.label.height())
+
+                self.label.setPixmap(self.pixmap)
+                if self.isRECOn == True:
+                    self.writer.write(org)
+                    self.draw_REC()
         self.count += 1
 
 
@@ -223,6 +302,7 @@ class WindowClass(QMainWindow, from_class) :
             self.camera_btn.setText("camera off")
             self.isCameraOn = 1
             self.RECButton.show()
+            self.capture_btn.show()
 
             self.cameraStart()
 
@@ -230,6 +310,7 @@ class WindowClass(QMainWindow, from_class) :
             self.camera_btn.setText("camera on")
             self.isCameraOn = 0
             self.RECButton.hide()
+            self.capture_btn.hide()
 
             self.cameraStop()
             self.recordStop()
@@ -304,13 +385,18 @@ class WindowClass(QMainWindow, from_class) :
     def playStart(self, file):
         if self.canDraw == True:
             self.draw_end()
+            
         if self.camera.running == True:###################
             pass
+        self.RECButton.show()
+        self.capture_btn.show()
         self.camera.running = True
         self.camera.start()
         self.video = cv2.VideoCapture(file[0])
         
     def playStop(self):
+        self.RECButton.hide()
+        self.capture_btn.hide()
         self.camera.running = False
         self.count = 0
         self.video.release()
@@ -324,7 +410,18 @@ class WindowClass(QMainWindow, from_class) :
         self.video_channel = self.video.get(cv2.CAP_PROP_CHANNEL)
 
         
+    def draw_REC(self):
+        painter = QPainter(self.label.pixmap())
+        painter.setPen(QPen(Qt.red, 10, Qt.SolidLine))
         
+        font = QFont()
+        font.setFamily("Times")
+        font.setBold(True)
+        font.setPointSize(40)
+
+        painter.setFont(font)
+        painter.drawText(50, 50, "REC")
+        painter.end
 
 
     def playVideo(self):
@@ -340,9 +437,12 @@ class WindowClass(QMainWindow, from_class) :
             self.pixmap = self.pixmap.fromImage(qimage)
             self.pixmap = self.pixmap.scaled(self.label.width(), self.label.height())
 
+            if self.isRECOn == True:
+                self.writer.write(frame)
+                self.draw_REC()
             self.label.setPixmap(self.pixmap)
             self.label.resize(self.pixmap.width(), self.pixmap.height())
-                
+
             
                 
         self.playStop()
