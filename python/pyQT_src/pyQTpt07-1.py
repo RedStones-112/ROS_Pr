@@ -28,7 +28,7 @@ class WindowClass(QMainWindow, from_class) :
         for gender in gender_list:
             self.gender_cb.addItem(gender)
         
-        self.start_BD.setDateTime(19600101)
+        #self.start_BD.setDateTime(19600101)
         self.pushButton.clicked.connect(self.create_query)
 
 
