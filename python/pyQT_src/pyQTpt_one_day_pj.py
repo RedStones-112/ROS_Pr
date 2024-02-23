@@ -43,11 +43,6 @@ class Camera(QThread) :
 
 
 
-
-
-
-
-
 from_class = uic.loadUiType("/home/rds/amr_ws/ROS_Pr-1/python/pyQT_src/camera_app.ui")[0]
 class WindowClass(QMainWindow, from_class) :
     def __init__(self):
@@ -56,6 +51,7 @@ class WindowClass(QMainWindow, from_class) :
         self.setWindowTitle("camera_app")
         self.RECButton.hide()
         self.capture_btn.hide()
+        self.pointButton.hide()
 
         self.pixmap = QPixmap()
         self.label.setPixmap(self.pixmap)
@@ -66,16 +62,17 @@ class WindowClass(QMainWindow, from_class) :
         self.record = Camera(self)
         self.record.daemon = True
 
-        self.playVideo = Camera(self)
-        self.playVideo.deamon = True
+        self.playVideoth = Camera(self)
+        self.playVideoth.deamon = True
 
         self.isCameraOn = 0
         self.count = 0
         self.threshold_RGB = 0
         self.isRECOn = False
-        
-        self.canDraw = False
-        
+        self.pointCount = 0
+        self.pointXY = [[0, 0], [0, 0], [0, 0], [0, 0]]
+        self.canDraw = "False"
+        self.capture = np.array([[None]])
         min_max = [0, 100]
         self.HSV = [min_max[1], min_max[1], min_max[1]]
         self.RGB = [min_max[1], min_max[1], min_max[1]]
@@ -126,12 +123,68 @@ class WindowClass(QMainWindow, from_class) :
         self.videoButton.clicked.connect(self.openVideoFile)
         self.camera_btn.clicked.connect(self.clickCamera)
         self.RECButton.clicked.connect(self.clickREC)
-
-
+        self.pointButton.clicked.connect(self.clickFourPoint)
+        self.saveButton.clicked.connect(self.saveImg)
         
         self.camera.update.connect(self.updateCamera)
-        # self.record.update.connect(self.playVideo)
+        self.playVideoth.update.connect(self.playVideo)
 
+
+
+    def imgToPixmap(self, img):
+        h, w, c = img.shape
+        qimage = QImage(img.data, w, h, w*c, QImage.Format_RGB888)
+        
+        self.pixmap = self.pixmap.fromImage(qimage)
+        self.pixmap = self.pixmap.scaled(self.label.width(), self.label.height())
+
+        self.label.setPixmap(self.pixmap)
+        self.label.resize(self.pixmap.width(), self.pixmap.height())
+
+    def unfurl(self):
+        
+        points1 =  self.pointXY
+        #points1.sort() ## point 순서 정하는 알고리즘 필요
+        points1 = np.float32(points1)
+        
+        img = self.convertPixMapToArr()
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        points2 = np.float32([[0, 0],[0, 700],[700, 0],[700, 700]]) #수정필요
+
+        M = cv2.getPerspectiveTransform(points1, points2)
+
+        img = cv2.warpPerspective(img, M, (1100,1100))# 수정필요
+
+        img = self.pretreatment(img)
+        img = cv2.flip(img, 0)
+
+        h, w, c = img.shape
+        qimage = QImage(img.data, w, h, w*c, QImage.Format_RGB888)
+        
+        self.pixmap = self.pixmap.fromImage(qimage)
+        self.pixmap = self.pixmap.scaled(self.label.width(), self.label.height())
+
+        self.label.setPixmap(self.pixmap)
+        
+
+    def compareImg(self, img):
+        pixmap_img = self.convertPixMapToArr()
+
+
+    def saveImg(self):
+        img = self.convertPixMapToArr()
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        cv2.imwrite("./cap_img.png", img)
+
+    def clickFourPoint(self):
+        if self.canDraw == "True":
+            self.pointCount = 0
+            self.canDraw = "point"
+            self.pointButton.setText("cancel")
+
+        elif self.canDraw == "point":
+            self.canDraw = "True"
+            self.pointButton.setText("4 point")
 
 
     def pretreatment(self, img): # 전처리
@@ -168,40 +221,48 @@ class WindowClass(QMainWindow, from_class) :
     def clickCapture(self, img):
         if self.camera.running == True:
             self.clickCamera()
+        if self.record.running == True:
+            self.clickREC()
+        if self.playVideoth.running == True:
+            self.playStop()
 
-        img = self.convertPixMapToArr()
+        if self.capture.all() == None:
+            img = self.convertPixMapToArr()
+            self.capture = img
+        else:
+            img = self.capture
+
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = self.pretreatment(img)
 
 
-        h, w, c = img.shape
-        qimage = QImage(img.data, w, h, w*c, QImage.Format_RGB888)
-        
-        self.pixmap = self.pixmap.fromImage(qimage)
-        self.pixmap = self.pixmap.scaled(self.label.width(), self.label.height())
-
-        self.label.setPixmap(self.pixmap)
+        self.imgToPixmap(img)
 
 
 
         self.draw_start()
 
-        #cv2. imwrite("/home/rds/amr_ws/ROS_Pr-1/python/cv_data/cap_img.png",img)
+        
     
 
 
     def draw_start(self):
-        self.canDraw = True
+        self.canDraw = "True"
+        self.pointButton.show()
+        self.painter = QPainter(self.label.pixmap())
 
     def draw_end(self):
-        self.canDraw = False
+        self.canDraw = "False"
+        self.pointButton.hide()
+        self.capture = np.array([[None]])
         self.x = None
         self.y = None
+        self.painter.end()
     
     def mouseMoveEvent(self, event):
-        if self.canDraw == True:
+        if self.canDraw == "True":
             thick = 5
-            self.painter = QPainter(self.label.pixmap())
+            
             self.pen_color = self.pen_color_box.currentText()
             eval(f"self.painter.setPen(QPen(Qt.{self.pen_color}, {thick}, Qt.SolidLine))")
             if self.x is None:
@@ -213,14 +274,36 @@ class WindowClass(QMainWindow, from_class) :
             y = self.label.y()
 
             self.painter.drawLine(self.x - x, self.y - y, event.x() - x, event.y() - y)
-            self.painter.end()
+            
             self.update()
 
             self.x = event.x()
             self.y = event.y()
-            self.painter.end
+            
+
+    def mouseReleaseEvent(self, event):
+        self.x = None
+        self.y = None
+
         
-        
+    def mousePressEvent(self, event):
+        if self.canDraw == "point" and self.pointCount < 4:
+            
+            self.painter.setPen(QPen(Qt.red, 3, Qt.SolidLine))
+            
+            x = self.label.x()
+            y = self.label.y()
+
+            self.painter.drawEllipse(event.x() - x, event.y() - y, 5, 5)
+            
+            self.update()
+            
+            self.pointXY[self.pointCount] = [event.x() - x, event.y() - y]
+            self.pointCount += 1
+            if self.pointCount == 4:
+                self.canDraw = "False"
+                self.unfurl()
+                self.clickFourPoint()
 
     #def draw_square (self):###
 
@@ -236,8 +319,15 @@ class WindowClass(QMainWindow, from_class) :
         self.HSV[1] = self.S_slider.value()
         self.HSV[2] = self.V_slider.value()
 
-
         self.threshold_val.setText(f"threshold : {self.threshold_RGB}")
+
+        if self.capture.all() == None:
+            pass
+        else:
+            img = self.capture
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            img = self.contorl_color(img)
+            self.imgToPixmap(img)
 
 
     def contorl_color(self, img):
@@ -284,13 +374,8 @@ class WindowClass(QMainWindow, from_class) :
 
             else:#color
                 
-                h, w, c = img.shape
-                qimage = QImage(img.data, w, h, w*c, QImage.Format_RGB888)
-                
-                self.pixmap = self.pixmap.fromImage(qimage)
-                self.pixmap = self.pixmap.scaled(self.label.width(), self.label.height())
+                self.imgToPixmap(img)
 
-                self.label.setPixmap(self.pixmap)
                 if self.isRECOn == True:
                     self.writer.write(org)
                     self.draw_REC()
@@ -298,11 +383,16 @@ class WindowClass(QMainWindow, from_class) :
 
 
     def clickCamera(self):
+        if self.playVideoth.running == True:
+            self.playStop()
+
         if self.isCameraOn == 0:
             self.camera_btn.setText("camera off")
             self.isCameraOn = 1
             self.RECButton.show()
             self.capture_btn.show()
+            
+
 
             self.cameraStart()
 
@@ -311,6 +401,7 @@ class WindowClass(QMainWindow, from_class) :
             self.isCameraOn = 0
             self.RECButton.hide()
             self.capture_btn.hide()
+            
 
             self.cameraStop()
             self.recordStop()
@@ -319,7 +410,7 @@ class WindowClass(QMainWindow, from_class) :
     def cameraStart(self):
         self.camera.running = True
         self.camera.start()
-        if self.canDraw == True:
+        if self.canDraw == "True":
             self.draw_end()
         self.video = cv2.VideoCapture(-1)
 
@@ -363,53 +454,6 @@ class WindowClass(QMainWindow, from_class) :
         if self.isRECOn == True:
             self.writer.release()
         
-        
-
-
-    def openFile(self):
-        file = QFileDialog.getOpenFileName(filter="Image (*.*)")
-
-        image = cv2.imread(file[0])
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-        h, w, c = image.shape
-        qimage = QImage(image.data, w, h, w*c, QImage.Format_RGB888)
-
-        self.pixmap = self.pixmap.fromImage(qimage)
-        self.pixmap = self.pixmap.scaled(self.label.width(), self.label.height())
-
-        self.label.setPixmap(self.pixmap)
-        self.label.resize(self.pixmap.width(), self.pixmap.height())
-
-
-    def playStart(self, file):
-        if self.canDraw == True:
-            self.draw_end()
-            
-        if self.camera.running == True:###################
-            pass
-        self.RECButton.show()
-        self.capture_btn.show()
-        self.camera.running = True
-        self.camera.start()
-        self.video = cv2.VideoCapture(file[0])
-        
-    def playStop(self):
-        self.RECButton.hide()
-        self.capture_btn.hide()
-        self.camera.running = False
-        self.count = 0
-        self.video.release()
-
-    def openVideoFile(self):
-        file = QFileDialog.getOpenFileName(filter="Video (*avi *webm)")
-        
-        self.playStart(file)
-        self.video_width = self.video.get(cv2.CAP_PROP_FRAME_WIDTH)
-        self.video_height = self.video.get(cv2.CAP_PROP_FRAME_HEIGHT)
-        self.video_channel = self.video.get(cv2.CAP_PROP_CHANNEL)
-
-        
     def draw_REC(self):
         painter = QPainter(self.label.pixmap())
         painter.setPen(QPen(Qt.red, 10, Qt.SolidLine))
@@ -422,30 +466,72 @@ class WindowClass(QMainWindow, from_class) :
         painter.setFont(font)
         painter.drawText(50, 50, "REC")
         painter.end
+        
+
+
+    def openFile(self):
+        file = QFileDialog.getOpenFileName(filter="Image (*.*)")
+        if self.camera.running == True:
+            self.clickCamera()
+        if self.record.running == True:
+            self.clickREC()
+        image = cv2.imread(file[0])
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        self.imgToPixmap(image)
+        self.draw_start()
+
+
+
+    def playStart(self, file):
+        if self.canDraw == "True":
+            self.draw_end()
+            
+        if self.camera.running == True:###################
+            pass
+        self.RECButton.show()
+        self.capture_btn.show()
+        
+        self.playVideoth.running = True
+        self.playVideoth.start()
+        self.video = cv2.VideoCapture(file[0])
+        
+    def playStop(self):
+        self.RECButton.hide()
+        self.capture_btn.hide()
+        
+        self.playVideoth.running = False
+        self.count = 0
+        self.video.release()
+
+    def openVideoFile(self):
+        file = QFileDialog.getOpenFileName(filter="Video (*avi *webm)")
+        
+        self.playStart(file)
+        self.video_width = self.video.get(cv2.CAP_PROP_FRAME_WIDTH)
+        self.video_height = self.video.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        self.video_channel = self.video.get(cv2.CAP_PROP_CHANNEL)
+
+        
 
 
     def playVideo(self):
         ret, frame = self.video.read()
         if ret:
             frame = self.contorl_color(frame)
-            self.display = frame
+            
 
 
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            qimage = QImage(frame.data, self.video_width, self.video_height, self.video_width*self.video_channel, QImage.Format_RGB888)
-
-            self.pixmap = self.pixmap.fromImage(qimage)
-            self.pixmap = self.pixmap.scaled(self.label.width(), self.label.height())
+            self.imgToPixmap(frame)
 
             if self.isRECOn == True:
                 self.writer.write(frame)
                 self.draw_REC()
-            self.label.setPixmap(self.pixmap)
-            self.label.resize(self.pixmap.width(), self.pixmap.height())
+            
 
             
                 
-        self.playStop()
+        
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

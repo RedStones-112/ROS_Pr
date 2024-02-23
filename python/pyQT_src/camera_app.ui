@@ -378,6 +378,32 @@
     <string>threshold : 0</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="pointButton">
+   <property name="geometry">
+    <rect>
+     <x>470</x>
+     <y>20</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>4 point</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="saveButton">
+   <property name="geometry">
+    <rect>
+     <x>820</x>
+     <y>20</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>save</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
