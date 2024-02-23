@@ -4,27 +4,74 @@
 ################################
 answer = []
 ################################
-import matplotlib.pyplot as plt
-import cv2
+import sys
+import cv2, imutils
+import urllib.request
+import time
+import datetime
 import numpy as np
-pts1 = np.float32([[5, 5],[5, 200],[200, 5],[200, 200]])
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5 import uic
+
+from_class = uic.loadUiType("/home/rds/amr_ws/ROS_Pr-1/python/pyQT_src/camera_app_re.ui")[0]
+
+class WindowClass(QMainWindow, from_class) :
+    def __init__(self):
+        super().__init__() ## 상속받은거 __init__ 동작
+        self.setupUi(self)
+        self.setWindowTitle("camera_app")
+        self.RECButton.hide()
+        self.capture_btn.hide()
+        self.pointButton.hide()
+
+        self.pixmap = QPixmap()
+        self.label.setPixmap(self.pixmap)
 
 
-img = cv2.imread("/home/rds/amr_ws/ROS_Pr-1/python/cv_data/candies.png")
-#pts1 = np.float32([[504,1003],[243,1525],[1000,1000],[1280,1685]])
 
-# 좌표의 이동점
-pts2 = np.float32([[10,10],[10,1000],[1000,10],[1000,1000]])
+        
+        self.pushButton.clicked.connect(self.openFile)
+        
 
-# pts1의 좌표에 표시. perspective 변환 후 이동 점 확인.
-# cv2.circle(img, (504,1003), 20, (255,0,0),-1)
-# cv2.circle(img, (243,1524), 20, (0,255,0),-1)
-# cv2.circle(img, (1000,1000), 20, (0,0,255),-1)
-# cv2.circle(img, (1280,1685), 20, (0,0,0),-1)
 
-plt.subplot(121),plt.imshow(img),plt.title('image')
-#plt.subplot(122),plt.imshow(dst),plt.title('Perspective')
-plt.show()
-M = cv2.getPerspectiveTransform(pts1, pts2)
 
-dst = cv2.warpPerspective(img, M, (1100,1100))
+
+
+
+    def openFile(self):################
+        file = QFileDialog.getOpenFileName(filter="Image,Video (*png *jpg *avi *webm)")
+        if  "jpg" in file[0] or "png" in file[0]:
+            print("I")
+            # image = cv2.imread(file[0])
+            # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        elif "avi" in file[0] or "webm" in file[0]:
+            print("V")
+            # self.playStart(file)
+            # self.video_width = self.video.get(cv2.CAP_PROP_FRAME_WIDTH)
+            # self.video_height = self.video.get(cv2.CAP_PROP_FRAME_HEIGHT)
+            # self.video_channel = self.video.get(cv2.CAP_PROP_CHANNEL)
+
+        
+
+
+            
+
+            
+                
+        
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    myWindows = WindowClass()
+    myWindows.show()
+    sys.exit(app.exec())
+
+
+
+
+
+
+
+
