@@ -43,7 +43,7 @@ class Camera(QThread) :
 
 
 
-from_class = uic.loadUiType("/home/rds/amr_ws/ROS_Pr-1/python/pyQT_src/camera_app_re.ui")[0]
+from_class = uic.loadUiType("./python/pyQT_src/camera_app_re.ui")[0]
 class WindowClass(QMainWindow, from_class) :
     def __init__(self):
         super().__init__() ## 상속받은거 __init__ 동작
@@ -59,16 +59,22 @@ class WindowClass(QMainWindow, from_class) :
         self.camera = Camera(self)
         self.camera.daemon = True
 
-        self.playVideoth = Camera(self)
-        self.playVideoth.deamon = True
 
 
-        self.count = 0
+        self.status_Thread = Camera(self)
+        self.status_Thread.deamon = True
+
+
+
+        
+        self.video = None
+        self.image = None
         
         self.draw_status = "False"
+        self.display_status = "None"
         self.isCameraOn = False
         self.isRECOn = False
-        self.isVideoPlay = False
+        
 
         self.isImage = False
         
@@ -97,8 +103,8 @@ class WindowClass(QMainWindow, from_class) :
         self.B_slider.setRange(min_max[0], min_max[1])
         self.B_slider.setValue(self.RGB[2])
 
-        self.threshold_slider.setRange(min_max[0], 255)
-        self.threshold_slider.setValue(self.threshold_RGB)
+        # self.threshold_slider.setRange(min_max[0], 255)
+        # self.threshold_slider.setValue(self.threshold_RGB)
 
         self.S_slider.setRange(min_max[0], min_max[1])
         self.S_slider.setValue(self.HSV[1])
@@ -125,15 +131,14 @@ class WindowClass(QMainWindow, from_class) :
 
         self.capture_btn.clicked.connect(self.clickCapture)
         self.pushButton.clicked.connect(self.openFile)
-        self.videoButton.clicked.connect(self.openVideoFile)
         self.camera_btn.clicked.connect(self.clickCamera)
         self.RECButton.clicked.connect(self.clickREC)
         self.pointButton.clicked.connect(self.clickFourPoint)
         self.saveButton.clicked.connect(self.saveImg)
         
-        self.camera.update.connect(self.updateCamera)
-        self.playVideoth.update.connect(self.playVideo)
-
+        self.camera.update.connect(self.updateDisplay)
+        self.status_Thread.update.connect(self.updateStatus)
+        
 
 
     def imgToPixmap(self, img):
@@ -223,9 +228,13 @@ class WindowClass(QMainWindow, from_class) :
         
         return img
 
-    def clickCapture(self, img):
-        pass
-
+    def clickCapture(self):
+        if self.display_status == "Video":
+            self.display_status = "Image"
+            
+            self.image = self.convertPixMapToArr()
+            self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+            
         
     
 
@@ -258,7 +267,7 @@ class WindowClass(QMainWindow, from_class) :
             self.y = event.y()
             
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self):
         self.x = None
         self.y = None
 
@@ -322,10 +331,16 @@ class WindowClass(QMainWindow, from_class) :
     
 
 
-    def updateCamera(self):
-        ret, img = self.video.read()
-    
-        if ret:
+    def updateDisplay(self):
+        ret = False
+        if self.display_status == "Video":
+            ret, img = self.video.read()
+        elif self.display_status == "Image":
+            img = self.image
+            
+        
+            
+        if ret or self.image.all() != None:
             org = img
             
             
@@ -350,29 +365,75 @@ class WindowClass(QMainWindow, from_class) :
                 if self.isRECOn == True:
                     self.writer.write(org)
                     self.draw_REC()
-        self.count += 1
-
+        
+    def updateStatus(self):
+        pass
 
     def clickCamera(self):
-        pass
+        if self.isCameraOn == False:
+            self.camera_btn.setText("camera off")
+            self.isCameraOn = True
+            
+            
+            self.cameraStart()
 
-
+        else:
+            self.camera_btn.setText("camera on")
+            self.isCameraOn = False
+            
+            self.cameraStop()
+            
 
     def cameraStart(self):
-        pass
+        self.display_status = "Video"
+        self.camera.running = True
+        self.camera.start()
+        
+        self.video = cv2.VideoCapture(-1)
+        self.RECButton.show()
+        self.capture_btn.show()
 
     def cameraStop(self):
-        pass
+        self.display_status = "None"
+        self.camera.running = False
+        
+        self.video.release()
+        self.RECButton.hide()
+        self.capture_btn.hide()
 
-
-    def updateRecording(self):
-        pass
-
-
+    def playStart(self, file):
+        self.display_status = "Video"
+        self.camera.running = True
+        self.camera.start()
+        
+        self.video = cv2.VideoCapture(file[0])
+        self.RECButton.show()
+        self.capture_btn.show()
+        
+        self.video_width = self.video.get(cv2.CAP_PROP_FRAME_WIDTH)
+        self.video_height = self.video.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        self.video_channel = self.video.get(cv2.CAP_PROP_CHANNEL)
+        
+        
+        
+    def playStop(self):
+        self.camera.running = False
+        self.video.release()
+    
     def clickREC(self):
-        pass
+        if self.isRECOn == False:
+            self.RECButton.setText("REC off")
+            self.isRECOn = True
+            
+            self.recordStart()
 
-
+        else:
+            self.RECButton.setText("REC on")
+            self.isRECOn = False
+            
+            self.RECButton.hide()
+            self.capture_btn.hide()
+            self.recordStop()
 
     def recordStart(self):
         pass
@@ -383,36 +444,32 @@ class WindowClass(QMainWindow, from_class) :
     def draw_REC(self):
         pass
         
-
+    def startImage(self):
+        self.display_status = "Image"
+        self.image_Thread.running = True
+        self.image_Thread.start()
+    
+    def endImage(self):
+        self.camera.running = False
+        
 
     def openFile(self):################
         file = QFileDialog.getOpenFileName(filter="Image,Video (*png *jpg *avi *webm)")
         if "jpg" in file[0] or "png" in file[0]:
-            image = cv2.imread(file[0])
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            self.image = cv2.imread(file[0])
+            self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+            self.startImage()
+            
         elif "avi" in file[0] or "webm" in file[0]:
             self.playStart(file)
-            self.video_width = self.video.get(cv2.CAP_PROP_FRAME_WIDTH)
-            self.video_height = self.video.get(cv2.CAP_PROP_FRAME_HEIGHT)
-            self.video_channel = self.video.get(cv2.CAP_PROP_CHANNEL)
+                        
+        else: # 추후 에러창 추가
+            pass
 
 
-
-
-    def playStart(self, file):
-        pass
-        
-    def playStop(self):
-        pass
-
-    def openVideoFile(self):
-        pass
 
         
 
-
-    def playVideo(self):
-        pass
             
 
             
