@@ -63,7 +63,8 @@ class WindowClass(QMainWindow, from_class) :
 
         self.status_Thread = Camera(self)
         self.status_Thread.deamon = True
-
+        self.status_Thread.running = True
+        self.status_Thread.start()
 
 
         
@@ -74,7 +75,7 @@ class WindowClass(QMainWindow, from_class) :
         self.display_status = "None"
         self.isCameraOn = False
         self.isRECOn = False
-        
+        self.silderShowStatus = False
 
         self.isImage = False
         
@@ -187,13 +188,13 @@ class WindowClass(QMainWindow, from_class) :
         cv2.imwrite("./cap_img.png", img)
 
     def clickFourPoint(self):
-        if self.canDraw == "True":
+        if self.draw_status == "True":
             self.pointCount = 0
-            self.canDraw = "point"
+            self.draw_status = "point"
             self.pointButton.setText("cancel")
 
-        elif self.canDraw == "point":
-            self.canDraw = "True"
+        elif self.draw_status == "point":
+            self.draw_status = "True"
             self.pointButton.setText("4 point")
 
 
@@ -246,7 +247,7 @@ class WindowClass(QMainWindow, from_class) :
         pass
     
     def mouseMoveEvent(self, event):
-        if self.canDraw == "True":
+        if self.draw_status == "True":
             thick = 5
             
             self.pen_color = self.pen_color_box.currentText()
@@ -367,7 +368,35 @@ class WindowClass(QMainWindow, from_class) :
                     self.draw_REC()
         
     def updateStatus(self):
-        pass
+        if self.RGBButton.isChecked() and self.silderShowStatus == False:
+            self.R_slider.show()
+            self.G_slider.show()
+            self.B_slider.show()
+            self.label_R.show()
+            self.label_G.show()
+            self.label_B.show()
+            
+            self.S_slider.hide()
+            self.V_slider.hide()
+            self.label_S.hide()
+            self.label_V.hide()
+
+            self.silderShowStatus = True
+            
+        elif self.HSVButton.isChecked() and self.silderShowStatus == True:
+            self.R_slider.hide()
+            self.G_slider.hide()
+            self.B_slider.hide()
+            self.label_R.hide()
+            self.label_G.hide()
+            self.label_B.hide()
+
+            self.S_slider.show()
+            self.V_slider.show()
+            self.label_S.show()
+            self.label_V.show()
+
+            self.silderShowStatus = False
 
     def clickCamera(self):
         if self.isCameraOn == False:
