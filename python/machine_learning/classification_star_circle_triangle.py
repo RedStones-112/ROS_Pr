@@ -41,7 +41,6 @@ from tensorflow.keras.layers import GlobalAveragePooling2D, Dense, Dropout
 gpus = tf.config.experimental.list_physical_devices('GPU') #with import tensorflow
 tf.config.experimental.set_memory_growth(gpus[0], True) # me too
 
-
 # 1. 데이터셋 만들기
 # 2. 데이터셋 나눠서 훈련 및 테스트
 # 3. 모델 저장
@@ -49,19 +48,20 @@ tf.config.experimental.set_memory_growth(gpus[0], True) # me too
 # 
 #
 
-path = "./python/cv_data" ##
-
+path = "./python/cv_data/figure" ##
+label = os.listdir(path)
+print(label)
 seed = 13
 tf.random.set_seed(seed)
 np.random.seed(seed)
 
 train_df = pd.DataFrame({"file" : os.listdir(path + "/train")})
-train_df["label"] = train_df["file"].apply(lambda x: x.split(".")[0])
+train_df["label"] = train_df["file"].apply(lambda x: x.split(".")[0])##
 
 
 
 test_df = pd.DataFrame({"file":os.listdir(path + "/test1")})
-
+test_df["label"] = test_df["file"].apply(lambda x: x.split(".")[0])##
 
 train_data, val_data = train_test_split(train_df,
                                         test_size=0.2,
@@ -69,15 +69,18 @@ train_data, val_data = train_test_split(train_df,
                                         random_state=13)
 
 train_datagen = ImageDataGenerator(
-    rotation_range = 15,
+    rotation_range = 90,
     horizontal_flip=True,
+    vertical_flip=True,
     preprocessing_function = preprocess_input
 )
 val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
 
 
 FILES = path
-
+w = 224
+h = 224
+c = 3
 batch_size = 160
 train_generator = train_datagen.flow_from_dataframe(
     dataframe = train_data,
@@ -85,7 +88,7 @@ train_generator = train_datagen.flow_from_dataframe(
     x_col = "file",
     y_col = "label",
     class_mode = "categorical",
-    target_size = (224,224),
+    target_size = (w, h),
     batch_size = batch_size,
     seed = 13,
 )
@@ -97,7 +100,7 @@ val_generator = val_datagen.flow_from_dataframe(
     x_col = "file",
     y_col = "label",
     class_mode = "categorical",
-    target_size = (224,224),
+    target_size = (w, h),
     batch_size = batch_size,
     seed = 13,
     shuffle=False
@@ -106,7 +109,7 @@ val_generator = val_datagen.flow_from_dataframe(
 
 base_model = VGG16(
     weights = "imagenet",
-    input_shape = (224,224, 3),
+    input_shape = (w, h, c),
     include_top = False
 )
 
@@ -175,3 +178,5 @@ history = model.fit(
     callbacks = [reduce_lr, early_stopping, checkpoint]
     
 )
+
+model.save("SCT_model.h5")
