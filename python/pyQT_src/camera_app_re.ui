@@ -433,6 +433,19 @@
     </property>
    </widget>
   </widget>
+  <widget class="QLabel" name="resultLabel">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>60</y>
+     <width>141</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>result : </string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

@@ -48,20 +48,23 @@ tf.config.experimental.set_memory_growth(gpus[0], True) # me too
 # 
 #
 
-path = "./python/cv_data/figure" ##
+path = "./python/cv_data/figure/train_data" ##
 label = os.listdir(path)
-print(label)
+
 seed = 13
 tf.random.set_seed(seed)
 np.random.seed(seed)
 
-train_df = pd.DataFrame({"file" : os.listdir(path + "/train")})
+train_df = pd.DataFrame({"file" : os.listdir(path)})
 train_df["label"] = train_df["file"].apply(lambda x: x.split(".")[0])##
 
 
 
-test_df = pd.DataFrame({"file":os.listdir(path + "/test1")})
-test_df["label"] = test_df["file"].apply(lambda x: x.split(".")[0])##
+# test_df = pd.DataFrame({"file":os.listdir(path[:-7 + "test_data"])})
+# test_df["label"] = test_df["file"].apply(lambda x: x.split(".")[0])##
+
+
+
 
 train_data, val_data = train_test_split(train_df,
                                         test_size=0.2,
@@ -81,10 +84,10 @@ FILES = path
 w = 224
 h = 224
 c = 3
-batch_size = 160
+batch_size = 10
 train_generator = train_datagen.flow_from_dataframe(
     dataframe = train_data,
-    directory = FILES + "/train/",
+    directory = FILES,
     x_col = "file",
     y_col = "label",
     class_mode = "categorical",
@@ -96,7 +99,7 @@ train_generator = train_datagen.flow_from_dataframe(
 
 val_generator = val_datagen.flow_from_dataframe(
     dataframe = val_data,
-    directory = FILES + "/train/",
+    directory = FILES,
     x_col = "file",
     y_col = "label",
     class_mode = "categorical",
@@ -126,7 +129,7 @@ def vgg16_pretrained():
       Dense(100, activation="relu"),
       Dropout(0.4),
       Dense(64, activation="relu"),
-      Dense(2,activation="softmax")
+      Dense(3,activation="softmax")
   ])
   return model
 
@@ -169,14 +172,17 @@ checkpoint = tf.keras.callbacks.ModelCheckpoint(
     save_weights_only = True
 )
 
+
+
 history = model.fit(
     train_generator,
     epochs = 10,
     validation_data = val_generator,
     validation_steps = val_data.shape[0] // batch_size,
-    steps_per_epoch = train_data.shape[0] // batch_size,
+    steps_per_epoch=train_data.shape[0] // batch_size,
     callbacks = [reduce_lr, early_stopping, checkpoint]
     
 )
 
 model.save("SCT_model.h5")
+
