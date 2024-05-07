@@ -37,7 +37,7 @@ from tensorflow.keras.applications.vgg16 import preprocess_input, decode_predict
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import GlobalAveragePooling2D, Dense, Dropout
-raise
+
 gpus = tf.config.experimental.list_physical_devices('GPU') #with import tensorflow
 tf.config.experimental.set_memory_growth(gpus[0], True) # me too
 
